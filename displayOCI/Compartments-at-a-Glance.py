@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# # Python SDK for Cloud Native
+# # Compartments at a glance
 # 
 # 
 # 
@@ -27,7 +27,7 @@
 
 # ## Global variables and Imports
 
-# In[1]:
+# In[ ]:
 
 
 import os
@@ -41,12 +41,14 @@ from IPython.display import display, Math, HTML, Markdown
 display(HTML("<style>.container { width:100% !important; }</style>"))
 display(HTML("<style>div.output_scroll { height: 70em; }</style>"))
 
+
+
 # ## SSO Login initialization
 
 # ### Session must first be authenticated in python oci console
 # 
 
-# #### Log into VCN first - not necessary
+# #### Perform the following on your python command line
 # #### (oracle-cli) C:\Users\kevin>oci session authenticate --region us-ashburn-1 --profile hpc-sso
 #     Please switch to newly opened browser window to log in!
 #     Completed browser authentication process!
@@ -68,13 +70,13 @@ display(HTML("<style>div.output_scroll { height: 70em; }</style>"))
 
 # ### SSO config setup
 
-# In[2]:
+# In[ ]:
 
 
-ssoProfile='oracle-sso'
+ssoProfile='hpc-sso2'
 ssoRegion='us-ashburn-1'
 ssoProfileFlag = True
-profiles = ['oracle-sso']
+profiles = ['hpc-sso2']
 config = oci.config.from_file(profile_name=ssoProfile)
 token_file = config['security_token_file']
 token = None
@@ -89,13 +91,11 @@ compts = client.list_compartments(compartment_id=config['tenancy']              
 
 
 network = oci.core.VirtualNetworkClient({'region': ssoRegion}, signer=signer)
-# vcns = network.list_vcns({'region': ssoRegion}, signer=signer)
-vcns = network.list_vcns(compartment_id="ocid1.compartment.oc1..aaaaaaaava4g6hckwuqohodh6bhsngbmvxfm2c4sst3fooejz3tmcepdvz7q")
 
 
 # ### Test SSO config
 
-# In[3]:
+# In[ ]:
 
 
 list_compartments_response = client.list_compartments(compartment_id=config['tenancy']                                        ,compartment_id_in_subtree=True)
@@ -104,7 +104,7 @@ list_compartments_response = client.list_compartments(compartment_id=config['ten
 comptList = (list_compartments_response.data)
 for compt in comptList:
     #print(compt.name)
-    if compt.name in 'DigitalExperience':
+    if compt.name in 'kevin':
         break
         
 regions = client.list_regions()
@@ -117,7 +117,7 @@ pprint.pprint(compt)
 
 # #### General Report Methods
 
-# In[4]:
+# In[ ]:
 
 
 def formatCidrBlk(cidrBlk):
@@ -132,9 +132,12 @@ display(Markdown('$$ '+(formatCidrBlk('10.2.0.0/2') + ' $$ '  )))
 
 # #### Display Table of Compartments in this Report
 
-# In[5]:
+# In[ ]:
 
 
+# Set the myCompartments list for the compartments you want to display
+myCompartments = ['kevin', 'MainLab' ]
+#
 def showComptsTable(comptList):
     comptTableTitle = '$$\hspace {1mm} \\large {\\textbf{Compartments at a glance}}$$' 
     comptTable = ''
@@ -149,7 +152,7 @@ def showComptsTable(comptList):
     comptTableLine = "\\color{red}{\\textbf{ COMPT}} & {STATUS} & DESCR & {\\small REGIONS} & {\\small VCNS} "                      + " & {\\small COMPUTE}  & {\\small DATABASE} & {\\small STORAGE}  \\\[6pt] \hline "
     comptTableLines = []
     for compt in comptList:
-        if compt.name not in [ 'kevin' ,'MainLab' , 'MathLab','QuantumLab','DigitalExperience']:
+        if compt.name not in myCompartments:
             continue
         tmpTableLine = comptTableLine
         tmpTableLine = tmpTableLine.replace('COMPT', compt.name  )
@@ -395,7 +398,6 @@ def showComptsTable(comptList):
     
     for loopTableLine in comptTableLines:
         comptTable = comptTable + loopTableLine
-        break
 
     comptTable = comptTableTop + comptTable + " \end{array} "
 #     print('COMPTTABLE',comptTable)
